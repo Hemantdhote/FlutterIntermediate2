@@ -6,6 +6,7 @@ import '../../views/auth/signup_screen.dart';
 import '../../views/home/home_screen.dart';
 import '../../views/my_blogs/my_blogs_screen.dart';
 import '../../views/create_blog/create_blog_screen.dart';
+import '../../views/blog_details/blog_details_screen.dart';
 import 'app_routes.dart';
 
 import '../../controllers/create_blog_controller.dart';
@@ -30,6 +31,10 @@ class AppPages {
       binding: BindingsBuilder(() {
         Get.lazyPut<MyBlogsController>(() => MyBlogsController());
       }),
+    ),
+    GetPage(
+      name: AppRoutes.blogDetails,
+      page: () => const BlogDetailsScreen(),
     ),
   ];
 }

@@ -21,7 +21,7 @@ class MyBlogsController extends GetxController {
     fetchMyBlogs();
   }
 
-  void fetchMyBlogs() {
+  Future<void> fetchMyBlogs() async {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {

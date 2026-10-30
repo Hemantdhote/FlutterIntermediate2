@@ -1,9 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import '../app/routes/app_routes.dart';
 
+import '../constants/app_constants.dart';
 import '../models/blog_modal.dart';
 import '../repositories/blog_repository.dart';
 
@@ -15,15 +14,10 @@ class CreateBlogController extends GetxController {
   final tagsController = TextEditingController();
   final imageUrlController = TextEditingController();
 
-  final selectedCategory = 'Technology'.obs;
+  final selectedCategory = AppConstants.categories.first.obs;
   final isLoading = false.obs;
 
-  final categories = [
-    'Technology',
-    'Travel',
-    'Lifestyle',
-    'Education',
-  ];
+  List<String> get categories => AppConstants.categories;
 
   Future<void> createBlog() async {
     if (isLoading.value) return;
@@ -50,20 +44,21 @@ class CreateBlogController extends GetxController {
             .toList(),
         imageUrl: imageUrlController.text.trim(),
         authorId: user.uid,
-        authorName: user.displayName ??
-            user.email?.split('@').first ??
-            'Anonymous',
+        authorName: (user.displayName != null && user.displayName!.isNotEmpty)
+            ? user.displayName!
+            : (user.email?.split('@').first ?? 'Anonymous'),
       );
 
       await _repository.createBlog(blog);
+
+      _clearForm();
 
       Get.snackbar(
         'Success',
         'Your blog has been published!',
       );
 
-      // Get.back();
-      Get.offAllNamed(AppRoutes.home);
+      Get.back();
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -72,6 +67,14 @@ class CreateBlogController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void _clearForm() {
+    titleController.clear();
+    descriptionController.clear();
+    tagsController.clear();
+    imageUrlController.clear();
+    selectedCategory.value = AppConstants.categories.first;
   }
 
   @override

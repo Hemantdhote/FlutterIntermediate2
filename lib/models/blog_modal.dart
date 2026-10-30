@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BlogModel {
@@ -28,16 +27,27 @@ class BlogModel {
     Map<String, dynamic> map,
     String documentId,
   ) {
+    final rawDate = map['createdAt'];
+    DateTime? parsedDate;
+    if (rawDate is Timestamp) {
+      parsedDate = rawDate.toDate();
+    } else if (rawDate is DateTime) {
+      parsedDate = rawDate;
+    }
+
     return BlogModel(
       id: documentId,
-      title: map['title'] ?? '',
-      description: map['description'] ?? '',
-      category: map['category'] ?? '',
-      tags: List<String>.from(map['tags'] ?? []),
-      imageUrl: map['imageUrl'] ?? '',
-      authorId: map['authorId'] ?? '',
-      authorName: map['authorName'] ?? '',
-      createdAt: (map['createdAt'] as Timestamp?)?.toDate(),
+      title: map['title'] as String? ?? '',
+      description: map['description'] as String? ?? '',
+      category: map['category'] as String? ?? '',
+      tags: (map['tags'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      imageUrl: map['imageUrl'] as String? ?? '',
+      authorId: map['authorId'] as String? ?? '',
+      authorName: map['authorName'] as String? ?? '',
+      createdAt: parsedDate,
     );
   }
 
@@ -50,7 +60,9 @@ class BlogModel {
       'imageUrl': imageUrl,
       'authorId': authorId,
       'authorName': authorName,
-      'createdAt': FieldValue.serverTimestamp(),
+      'createdAt': createdAt != null
+          ? Timestamp.fromDate(createdAt!)
+          : FieldValue.serverTimestamp(),
     };
   }
 }

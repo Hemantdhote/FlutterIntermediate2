@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/user_modal.dart';
@@ -15,25 +14,16 @@ class UserRepository {
   }
 
   Future<void> createProfile(UserModel user) async {
-    await _users.doc(user.uid).set(user.toMap());
+    await _users.doc(user.uid).set(user.toMap(), SetOptions(merge: true));
   }
 
   Future<UserModel?> getProfile(String uid) async {
     final document = await _users.doc(uid).get();
 
-    if (!document.exists) {
+    if (!document.exists || document.data() == null) {
       return null;
     }
 
-    final data = document.data()!;
-
-    return UserModel(
-      uid: data['uid'] as String? ?? document.id,
-      name: data['name'] as String? ?? '',
-      email: data['email'] as String? ?? '',
-      photoUrl: data['photoUrl'] as String?,
-      provider: data['provider'] as String? ?? 'email',
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
-    );
+    return UserModel.fromMap(document.data()!, document.id);
   }
 }

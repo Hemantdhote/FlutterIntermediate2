@@ -9,12 +9,18 @@ class BlogRepository {
       _firestore.collection('blogs');
 
   Stream<List<BlogModel>> getAllBlogs() {
-    return _blogs.orderBy('createdAt', descending: true).snapshots().map((
-      snapshot,
-    ) {
-      return snapshot.docs.map((document) {
+    return _blogs.snapshots().map((snapshot) {
+      final list = snapshot.docs.map((document) {
         return BlogModel.fromMap(document.data(), document.id);
       }).toList();
+
+      list.sort((a, b) {
+        final aDate = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final bDate = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return bDate.compareTo(aDate);
+      });
+
+      return list;
     });
   }
 
@@ -25,12 +31,19 @@ class BlogRepository {
   Stream<List<BlogModel>> getMyBlogs(String userId) {
     return _blogs
         .where('authorId', isEqualTo: userId)
-        .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs.map((document) {
+          final list = snapshot.docs.map((document) {
             return BlogModel.fromMap(document.data(), document.id);
           }).toList();
+
+          list.sort((a, b) {
+            final aDate = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+            final bDate = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+            return bDate.compareTo(aDate);
+          });
+
+          return list;
         });
   }
 }

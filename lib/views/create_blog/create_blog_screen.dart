@@ -1,8 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/create_blog_controller.dart';
+import '../../utils/validators.dart';
+import '../../theme/app_colors.dart';
 
 class CreateBlogScreen extends StatefulWidget {
   const CreateBlogScreen({super.key});
@@ -20,6 +21,81 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
   void initState() {
     super.initState();
     controller = Get.find<CreateBlogController>();
+  }
+
+  void _showCategoryPicker(BuildContext context) {
+    // Unfocus any open soft keyboard first so the sheet appears cleanly
+    FocusScope.of(context).unfocus();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (bottomSheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Select Category',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(bottomSheetContext),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(),
+                ...controller.categories.map((category) {
+                  return Obx(() {
+                    final isSelected =
+                        controller.selectedCategory.value == category;
+
+                    return ListTile(
+                      leading: Icon(
+                        isSelected
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_off,
+                        color: isSelected ? AppColors.primary : Colors.grey,
+                      ),
+                      title: Text(
+                        category,
+                        style: TextStyle(
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: isSelected ? AppColors.primary : Colors.black87,
+                        ),
+                      ),
+                      onTap: () {
+                        controller.selectedCategory.value = category;
+                        Navigator.pop(bottomSheetContext);
+                      },
+                    );
+                  });
+                }),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -45,6 +121,11 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Publish an article for the community to read.',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                   const SizedBox(height: 24),
 
                   // Title
@@ -52,14 +133,10 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                     controller: controller.titleController,
                     decoration: const InputDecoration(
                       labelText: 'Blog Title',
+                      hintText: 'Enter a catchy title',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter blog title';
-                      }
-                      return null;
-                    },
+                    validator: (val) => Validators.required(val, 'blog title'),
                   ),
 
                   const SizedBox(height: 16),
@@ -69,39 +146,33 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                     controller: controller.descriptionController,
                     maxLines: 6,
                     decoration: const InputDecoration(
-                      labelText: 'Description',
+                      labelText: 'Description / Content',
+                      hintText: 'Write your story here...',
                       alignLabelWithHint: true,
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter description';
-                      }
-                      return null;
-                    },
+                    validator: (val) =>
+                        Validators.required(val, 'blog description'),
                   ),
 
                   const SizedBox(height: 16),
 
-                  // Category
+                  // Category Picker
                   Obx(() {
-                    return DropdownButtonFormField<String>(
-                      value: controller.selectedCategory.value,
-                      decoration: const InputDecoration(
-                        labelText: 'Category',
-                        border: OutlineInputBorder(),
+                    return InkWell(
+                      onTap: () => _showCategoryPicker(context),
+                      borderRadius: BorderRadius.circular(4),
+                      child: InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: 'Category',
+                          border: OutlineInputBorder(),
+                          suffixIcon: Icon(Icons.keyboard_arrow_down),
+                        ),
+                        child: Text(
+                          controller.selectedCategory.value,
+                          style: const TextStyle(fontSize: 16),
+                        ),
                       ),
-                      items: controller.categories.map((category) {
-                        return DropdownMenuItem(
-                          value: category,
-                          child: Text(category),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          controller.selectedCategory.value = value;
-                        }
-                      },
                     );
                   }),
 
@@ -111,7 +182,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                   TextFormField(
                     controller: controller.tagsController,
                     decoration: const InputDecoration(
-                      labelText: 'Tags',
+                      labelText: 'Tags (Optional)',
                       hintText: 'Flutter, Dart, Firebase',
                       helperText: 'Separate tags using commas',
                       border: OutlineInputBorder(),
@@ -125,25 +196,12 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                     controller: controller.imageUrlController,
                     keyboardType: TextInputType.url,
                     decoration: const InputDecoration(
-                      labelText: 'Image URL',
-                      hintText: 'https://example.com/image.jpg',
+                      labelText: 'Cover Image URL',
+                      hintText: 'https://images.unsplash.com/...',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      final url = value?.trim() ?? '';
-                      if (url.isEmpty) {
-                        return 'Please enter image URL';
-                      }
-
-                      final uri = Uri.tryParse(url);
-                      if (uri == null ||
-                          !uri.hasAuthority ||
-                          !['http', 'https'].contains(uri.scheme)) {
-                        return 'Please enter a valid HTTP/HTTPS URL';
-                      }
-
-                      return null;
-                    },
+                    validator: (val) =>
+                        Validators.url(val, fieldName: 'cover image URL'),
                   ),
 
                   const SizedBox(height: 24),
@@ -162,8 +220,15 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: controller.isLoading.value
-                          ? const CircularProgressIndicator()
-                          : const Text('Publish Blog'),
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text(
+                              'Publish Blog',
+                              style: TextStyle(fontSize: 16),
+                            ),
                     );
                   }),
                 ],

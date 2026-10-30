@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
@@ -12,6 +11,8 @@ class AuthController extends GetxController {
   final UserRepository _userRepository = UserRepository();
 
   final isLoading = false.obs;
+
+  User? get currentUser => _authService.currentUser;
 
   Future<void> signup({
     required String name,
@@ -34,9 +35,12 @@ class AuthController extends GetxController {
         throw Exception('Unable to create account.');
       }
 
+      final trimmedName = name.trim();
+      await user.updateDisplayName(trimmedName);
+
       final profile = UserModel(
         uid: user.uid,
-        name: name.trim(),
+        name: trimmedName,
         email: user.email ?? email.trim(),
         provider: 'email',
         createdAt: DateTime.now(),
@@ -88,12 +92,14 @@ class AuthController extends GetxController {
       final profile = await _userRepository.getProfile(user.uid);
 
       if (profile == null) {
-        Get.snackbar(
-          'Profile Missing',
-          'Your account exists, but its profile is missing. Please contact support.',
+        final newProfile = UserModel(
+          uid: user.uid,
+          name: user.displayName ?? user.email?.split('@').first ?? 'User',
+          email: user.email ?? email.trim(),
+          provider: 'email',
+          createdAt: DateTime.now(),
         );
-        await _authService.logout();
-        return;
+        await _userRepository.createProfile(newProfile);
       }
 
       Get.offAllNamed(AppRoutes.home);
