@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'routes/app_routes.dart';
 import 'routes/app_pages.dart';
 import '../theme/app_theme.dart';
+import 'bindings/initial_binding.dart';
 
 class BlogApp extends StatelessWidget {
   const BlogApp({super.key});
@@ -16,6 +17,7 @@ class BlogApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       initialRoute: AppRoutes.splash,
+      initialBinding: InitialBinding(),
       getPages: AppPages.pages,
     );
   }
