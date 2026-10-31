@@ -25,6 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     final user = FirebaseAuth.instance.currentUser;
+    debugPrint("userr: $user");
 
     if (user != null) {
       Get.offAllNamed(AppRoutes.home);

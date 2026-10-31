@@ -105,7 +105,7 @@ class MyBlogsScreen extends GetView<MyBlogsController> {
                       crossAxisCount: crossAxisCount,
                       crossAxisSpacing: 20,
                       mainAxisSpacing: 20,
-                      mainAxisExtent: 420,
+                      mainAxisExtent: 360,
                     ),
                     itemBuilder: (context, index) {
                       return BlogCard(blog: controller.blogs[index]);

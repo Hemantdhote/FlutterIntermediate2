@@ -20,8 +20,7 @@ class HomeScreen extends GetView<HomeController> {
         actions: [
           TextButton.icon(
             onPressed: () => Get.toNamed(AppRoutes.myBlogs),
-            icon: const Icon(Icons.bookmarks_outlined, size: 18),
-            label: const Text('My Blogs'),
+            label: const Text('My Blogs', style: TextStyle(fontSize: 18)),
           ),
           IconButton(
             tooltip: 'Logout',
@@ -189,23 +188,53 @@ class HomeScreen extends GetView<HomeController> {
   void _confirmLogout(BuildContext context) {
     Get.dialog(
       AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to sign out?'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          'Logout',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Are you sure you want to sign out?',
+          textAlign: TextAlign.center,
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              Get.find<AuthController>().logout();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Logout'),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Get.back(),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Cancel'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Get.back();
+                    Get.find<AuthController>().logout();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Logout'),
+                ),
+              ),
+            ],
           ),
         ],
       ),
