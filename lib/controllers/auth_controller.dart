@@ -118,6 +118,52 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> signInWithGoogle() async {
+    if (isLoading.value) return;
+
+    isLoading.value = true;
+
+    try {
+      final credential = await _authService.signInWithGoogle();
+      if (credential == null) {
+        isLoading.value = false;
+        return;
+      }
+
+      final user = credential.user;
+      if (user == null) {
+        throw Exception('Unable to sign in with Google.');
+      }
+
+      final exists = await _userRepository.profileExists(user.uid);
+      if (!exists) {
+        final profile = UserModel(
+          uid: user.uid,
+          name: user.displayName ?? user.email?.split('@').first ?? 'User',
+          email: user.email ?? '',
+          photoUrl: user.photoURL,
+          provider: 'google',
+          createdAt: DateTime.now(),
+        );
+        await _userRepository.createProfile(profile);
+      }
+
+      Get.offAllNamed(AppRoutes.home);
+    } on FirebaseAuthException catch (e) {
+      Get.snackbar(
+        'Google Sign In Failed',
+        _authErrorMessage(e.code),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Unable to sign in with Google. Please try again.',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> logout() async {
     await _authService.logout();
     Get.offAllNamed(AppRoutes.login);

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../controllers/auth_controller.dart';
 import '../../app/routes/app_routes.dart';
 import '../../utils/validators.dart';
+import 'widgets/google_sign_in_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -127,6 +128,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                     );
                   }),
+
+                  const SizedBox(height: 16),
+
+                  const GoogleSignInButton(),
 
                   const SizedBox(height: 12),
 
